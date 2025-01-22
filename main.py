@@ -1,0 +1,58 @@
+from fastapi import FastAPI, Depends, HTTPException, status
+from typing import List, Optional
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
+from database import SessionLocal, engine
+import models
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI()
+
+origins = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+]
+app.add_middleware (
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+class TransactionBase(BaseModel):
+    amount: float
+    description: str
+    category: str
+    date: str
+    is_income: bool
+
+class TransactionModel(TransactionBase):
+    id: int
+    class Config:
+        orm_mode = True
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+db_dependency = Depends(get_db)
+#db_dependency = Annotated[Session, Depends(get_db)]
+models.Base.metadata.create_all(bind=engine)
+
+
+@app.post("/transaction/", response_model=TransactionModel)
+async def create_transaction(transaction: TransactionBase, db: Session = db_dependency):
+    db_transaction = models.Transaction(**transaction.dict())
+    db.add(db_transaction)
+    db.commit()
+    db.refresh(db_transaction)
+    return db_transaction
+
+
+@app.get("/transaction/", response_model=List[TransactionModel])
+async def read_transactions(skip: int = 0, limit: int = 100, db: Session = db_dependency):
+    transactions = db.query(models.Transaction).offset(skip).limit(limit).all()
+    return transactions

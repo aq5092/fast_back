@@ -4,5 +4,5 @@ from sqlalchemy.ext.declarative import declarative_base
 
 # Create a connection to the database
 engine = create_engine('sqlite:///database.db')
-Session = sessionmaker(bind=engine, autoflush=False, autocommit=False)
+SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 Base = declarative_base()
