@@ -1,17 +1,16 @@
 from pydantic import BaseModel
 from typing import List, Optional
 
-class UserBase(BaseModel):
-    username: str
-    email: str
+class TaskBase(BaseModel):
+    name: str
+    
 
-class UserCreate(UserBase):
-    password: str
+
 
 class User(UserBase):
     id: int
     #is_active: bool
-    tasks: List[Task] = []
+    #posts: List[Post] = []
 
     class Config:
         orm_mode = True
