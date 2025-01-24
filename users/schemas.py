@@ -11,7 +11,7 @@ class UserCreate(UserBase):
 class User(UserBase):
     id: int
     #is_active: bool
-    tasks: List[Task] = []
+    #tasks: List[Task] = []
 
     class Config:
         orm_mode = True
