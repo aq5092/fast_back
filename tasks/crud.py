@@ -13,7 +13,7 @@ def get_tasks(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Task).offset(skip).limit(limit).all()
 
 def create_task(db:Session,task:schemas.TaskBase):
-    db_task = models.Task(taskname=task.taskname)
+    db_task = models.Task(task_name=task.task_name)
     db.add(db_task)
     db.commit()
     db.refresh(db_task)
