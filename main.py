@@ -3,8 +3,12 @@ from sqlalchemy.orm import Session
 from database import SessionLocal, engine
 from typing import List
 from fastapi.middleware.cors import CORSMiddleware
-from routers import users, tasks
+# from routers import users, tasks
+from routers import router
+from database import engine
+from sqlalchems import Base
 
+Base.metadata.create_all(bind=engine)
 app = FastAPI()
 origins = [
     "http://localhost:3000",
@@ -20,9 +24,9 @@ app.add_middleware (
     allow_headers=["*"],
 )
 
-app.include_router(users.router,tags=["Users"])
+app.include_router(router,tags=["Users"])
 
-app.include_router(tasks.router,tags=["Tasks"])
+# app.include_router(tasks.router,tags=["Tasks"])
 
 
 
