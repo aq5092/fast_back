@@ -1,15 +1,28 @@
 from pydantic import BaseModel
 from typing import List, Optional
+from datetime import date, datetime
+# Task uchun Pydantic model
+class TaskBase(BaseModel):
+    turi: str
+    asos: str
+    buyruq: str
+    created_at: datetime
+    updated_at: datetime
+    asos: str 
+    buyruq_raqami: str
+    xodim_soni:int
+    status: str 
+    izoh:str 
+    link:str 
+    link_kimda: str 
+    owner_id: str 
+    
 
-# Post uchun Pydantic model
-class PostBase(BaseModel):
-    title: str
-    content: str
 
-class PostCreate(PostBase):
+class TaskCreate(TaskBase):
     pass
 
-class PostResponse(PostBase):
+class TaskResponse(TaskBase):
     id: int
     owner_id: int
 
@@ -26,7 +39,7 @@ class UserCreate(UserBase):
 
 class UserResponse(UserBase):
     id: int
-    posts: List[PostResponse] = []  # Relational ma'lumot
+    tasks: List[TaskResponse] = []  # Relational ma'lumot
 
     class Config:
         orm_mode = True

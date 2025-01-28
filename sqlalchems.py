@@ -1,5 +1,5 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
-
+from sqlalchemy import Column, Integer, String, ForeignKey,  DateTime
+from datetime import datetime
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -12,14 +12,24 @@ class User(Base):
     username = Column(String, unique=True, nullable=False)
     email = Column(String, unique=True, nullable=False)
 
-    posts = relationship("Post", back_populates="owner")  # One-to-Many aloqasi
+    tasks = relationship("Task", back_populates="owner")  # One-to-Many aloqasi
 
-class Post(Base):
-    __tablename__ = "posts"
+class Task(Base):
+    __tablename__ = "tasks"
 
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, nullable=False)
-    content = Column(String, nullable=False)
+    turi = Column(String, nullable=False)
+    asos = Column(String, nullable=False)
+    buyruq = Column(String, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)  # Automatically set on creation
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)  # Automatically updated
+    asos = Column(String(length=20))
+    buyruq_raqami = Column(String(length=20))
+    xodim_soni = Column(Integer)
+    status = Column(String, nullable=False)
+    izoh = Column(String(length=100))
+    link = Column(String(length=100))
+    link_kimda = Column(String(length=20))
     owner_id = Column(Integer, ForeignKey("users.id"))
 
-    owner = relationship("User", back_populates="posts")  # Aloqani tasvirlash
+    owner = relationship("User", back_populates="tasks")  # Aloqani tasvirlash

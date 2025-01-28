@@ -11,15 +11,15 @@ def create_user(db: Session, user: pydantics.UserCreate):
     return db_user
 
 def get_user(db: Session, user_id: int):
-    return db.query(User).filter(User.id == user_id).first()
+    return db.query(sqlalchems.User).filter(sqlalchems.User.id == user_id).first()
 
-# Post uchun CRUD funksiyalar
-def create_post(db: Session, post: pydantics.PostCreate, user_id: int):
-    db_post = sqlalchems.Post(**post.dict(), owner_id=user_id)
-    db.add(db_post)
+# task uchun CRUD funksiyalar
+def create_task(db: Session, task: pydantics.TaskCreate, user_id: int):
+    db_task = sqlalchems.Task(**task.dict(), owner_id=user_id)
+    db.add(db_task)
     db.commit()
-    db.refresh(db_post)
-    return db_post
+    db.refresh(db_task)
+    return db_task
 
-def get_posts_by_user(db: Session, user_id: int):
-    return db.query(Post).filter(Post.owner_id == user_id).all()
+def get_tasks_by_user(db: Session, user_id: int):
+    return db.query(sqlalchems.Task).filter(sqlalchems.Task.owner_id == user_id).all()
