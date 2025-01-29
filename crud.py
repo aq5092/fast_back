@@ -38,6 +38,9 @@ def delete_user(db: Session, user_id: int):
 def get_user(db: Session, user_id: int):
     return db.query(sqlalchems.User).filter(sqlalchems.User.id == user_id).first()
 
+def get_users(db: Session):
+    return db.query(sqlalchems.User).all()
+
 # task uchun CRUD funksiyalar
 def create_task(db: Session, task: pydantics.TaskCreate, user_id: int):
 
@@ -55,6 +58,8 @@ def create_task(db: Session, task: pydantics.TaskCreate, user_id: int):
 def get_tasks_by_user(db: Session, user_id: int):
     return db.query(sqlalchems.Task).filter(sqlalchems.Task.owner_id == user_id).all()
 
+def get_all_tasks(db: Session):
+    return db.query(sqlalchems.Task).all()
 
 # Post ma'lumotlarini yangilash
 def update_task(db: Session, task_id: int, task_update: pydantics.TaskUpdate):

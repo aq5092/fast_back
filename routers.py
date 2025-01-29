@@ -12,6 +12,15 @@ router = APIRouter()
 def create_user_endpoint(user: UserCreate, db: Session = Depends(get_db)):
     return crud.create_user(db, user)
 
+
+@router.get("/users/", response_model=List[UserResponse])
+def get_all_users(db:Session= Depends(get_db)):
+    users = crud.get_users(db)
+    if not users:
+        raise HTTPException(status_code=404, detail="User not found")
+    return users
+
+
 @router.get("/users/{user_id}", response_model=UserResponse)
 def get_user_endpoint(user_id: int, db: Session = Depends(get_db)):
     user = crud.get_user(db, user_id)
@@ -43,6 +52,15 @@ def create_task_endpoint(user_id: int, task: TaskCreate, db: Session = Depends(g
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return crud.create_task(db, task, user_id)
+
+
+@router.get("/tasks/", response_model=List[TaskResponse])
+def get_all_tasks(db: Session= Depends(get_db)):
+    tasks = crud.get_all_tasks(db)
+    if not tasks:
+        raise HTTPException(status_code=404, detail="Tasks not found")
+    return tasks
+
 
 @router.get("/users/{user_id}/tasks/", response_model=List[TaskResponse])
 def get_user_tasks_endpoint(user_id: int, db: Session = Depends(get_db)):
