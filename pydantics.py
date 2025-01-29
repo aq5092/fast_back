@@ -15,7 +15,7 @@ class TaskBase(BaseModel):
     izoh:str 
     link:str 
     link_kimda: str 
-    owner_id: str 
+    owner_id: int 
 
 
 
