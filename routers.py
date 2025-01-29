@@ -19,6 +19,24 @@ def get_user_endpoint(user_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
+@router.put("/useru/{user_id}", response_model=UserResponse)
+def update_user_endpoint(user_id: int, user: UserCreate, db: Session = Depends(get_db)):
+    updated_user = crud.update_user(db, user_id, user)
+    if not updated_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return updated_user
+
+@router.delete("/userd/{user_id}")
+def delete_user_endpoint(user_id: int, db: Session = Depends(get_db)):
+    deleted_user = crud.delete_user(db, user_id)
+    if not deleted_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"detail": f"User with ID {user_id} deleted"}
+
+
+
+
+
 @router.post("/userc/{user_id}/tasks/", response_model=TaskResponse)
 def create_task_endpoint(user_id: int, task: TaskCreate, db: Session = Depends(get_db)):
     user = crud.get_user(db, user_id)
@@ -32,3 +50,17 @@ def get_user_tasks_endpoint(user_id: int, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return crud.get_tasks_by_user(db, user_id)
+
+@router.put("/tasku/{task_id}", response_model=TaskResponse)
+def update_task_endpoint(task_id: int, task: TaskCreate, db: Session = Depends(get_db)):
+    updated_task = crud.update_task(db, task_id, task)
+    if not updated_task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return updated_task
+
+@router.delete("/taskd/{task_id}")
+def delete_task_endpoint(task_id: int, db: Session = Depends(get_db)):
+    deleted_task = crud.delete_task(db, task_id)
+    if not deleted_task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return {"detail": f"Task with ID {task_id} deleted"}

@@ -16,11 +16,15 @@ class TaskBase(BaseModel):
     link:str 
     link_kimda: str 
     owner_id: str 
-    
+
 
 
 class TaskCreate(TaskBase):
     pass
+
+class TaskUpdate(TaskBase):
+    pass
+
 
 class TaskResponse(TaskBase):
     id: int
@@ -35,6 +39,9 @@ class UserBase(BaseModel):
     email: str
 
 class UserCreate(UserBase):
+    pass
+
+class UserUpdate(UserBase):
     pass
 
 class UserResponse(UserBase):
