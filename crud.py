@@ -40,7 +40,11 @@ def get_user(db: Session, user_id: int):
 
 # task uchun CRUD funksiyalar
 def create_task(db: Session, task: pydantics.TaskCreate, user_id: int):
+<<<<<<< HEAD
     task_data = task.dict(exclude={"owner_id"})  # Exclude 'owner_id'
+=======
+    task_data = task.dict(exclude={"owner_id"})
+>>>>>>> b781032211f84b6c01faff3fe729b275d8b13796
     db_task = sqlalchems.Task(**task_data, owner_id=user_id)
     db.add(db_task)
     db.commit()
