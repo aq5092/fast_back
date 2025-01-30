@@ -46,7 +46,7 @@ def delete_user_endpoint(user_id: int, db: Session = Depends(get_db)):
 
 
 
-@router.post("/userc/{user_id}/tasks/", response_model=TaskResponse)
+@router.post("/taskc/{user_id}", response_model=TaskResponse)
 def create_task_endpoint(user_id: int, task: TaskCreate, db: Session = Depends(get_db)):
     user = crud.get_user(db, user_id)
     if not user:
