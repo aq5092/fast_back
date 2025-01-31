@@ -7,7 +7,7 @@ class TaskBase(BaseModel):
     asos: str
     buyruq: str
     created_at: datetime
-    updated_at: datetime
+    # updated_at: datetime
     mazmuni: str 
     xodim_soni:int
     status: str 

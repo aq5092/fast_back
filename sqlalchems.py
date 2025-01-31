@@ -22,7 +22,7 @@ class Task(Base):
     asos = Column(String, nullable=False)
     buyruq = Column(String, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)  # Automatically set on creation
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)  # Automatically updated
+    # updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)  # Automatically updated
     mazmuni = Column(String(length=20))
     buyruq_raqami = Column(String(length=20))
     xodim_soni = Column(Integer)
