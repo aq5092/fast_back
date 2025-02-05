@@ -19,11 +19,11 @@ class Task(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     turi = Column(String, nullable=False)
-    asos = Column(String, nullable=False)
-    buyruq = Column(String, nullable=False)
+    asos = Column(String)
+    buyruq = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)  # Automatically set on creation
     # updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)  # Automatically updated
-    mazmuni = Column(String(length=20))
+    mazmuni = Column(String(length=20), nullable=False)
     buyruq_raqami = Column(String(length=20))
     xodim_soni = Column(Integer)
     status = Column(String, nullable=False)
