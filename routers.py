@@ -61,6 +61,12 @@ def get_all_tasks(db: Session= Depends(get_db)):
         raise HTTPException(status_code=404, detail="Tasks not found")
     return tasks
 
+@router.get("/task/{task_id}", response_model=TaskResponse)
+def get_task_by_id(task_id: int,db:Session=Depends(get_db)):
+    task = crud.get_task_by_id(db, task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return crud.get_task_by_id(db, task_id)
 
 @router.get("/users/{user_id}/tasks/", response_model=List[TaskResponse])
 def get_user_tasks_endpoint(user_id: int, db: Session = Depends(get_db)):

@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from typing import List
 import pydantics
 import sqlalchems
+from sqlalchemy.orm import joinedload, subqueryload
 # User uchun CRUD funksiyalar
 def create_user(db: Session, user: pydantics.UserCreate):
     db_user = sqlalchems.User(username=user.username, email=user.email)
@@ -59,8 +60,10 @@ def get_tasks_by_user(db: Session, user_id: int):
     return db.query(sqlalchems.Task).filter(sqlalchems.Task.owner_id == user_id).all()
 
 def get_all_tasks(db: Session):
-    return db.query(sqlalchems.Task).all()
+    return db.query(sqlalchems.Task).options(subqueryload(sqlalchems.Task.owner)).all()
 
+def get_task_by_id(db: Session, task_id: int):
+    return db.query(sqlalchems.Task).filter(sqlalchems.Task.id == task_id).first()
 # Post ma'lumotlarini yangilash
 def update_task(db: Session, task_id: int, task_update: pydantics.TaskUpdate):
     db_task = db.query(sqlalchems.Task).filter(sqlalchems.Task.id == task_id).first()
@@ -71,9 +74,9 @@ def update_task(db: Session, task_id: int, task_update: pydantics.TaskUpdate):
     db_task.asos = task_update.asos or db_task.asos
     db_task.buyruq = task_update.buyruq or db_task.buyruq
     db_task.created_at = task_update.created_at or db_task.created_at
-    db_task.updated_at = task_update.updated_at or db_task.updated_at
-    db_task.asos = task_update.asos or db_task.asos
-    db_task.buyruq_raqami = task_update.buyruq_raqami or db_task.buyruq_raqami
+    # db_task.updated_at = task_update.updated_at or db_task.updated_at
+    # db_task.asos = task_update.asos or db_task.asos
+    db_task.mazmuni = task_update.mazmuni or db_task.mazmuni
     db_task.xodim_soni = task_update.xodim_soni or db_task.xodim_soni
     db_task.status = task_update.status or db_task.status
     db_task.izoh = task_update.izoh or db_task.izoh
