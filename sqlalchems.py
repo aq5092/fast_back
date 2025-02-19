@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey,  DateTime
+
 from datetime import datetime
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
@@ -33,3 +34,8 @@ class Task(Base):
     owner_id = Column(Integer, ForeignKey("users.id"))
 
     owner = relationship("User", back_populates="tasks")  # Aloqani tasvirlash
+
+class PDFFile(Base):
+    __tablename__ = "pdf_files"
+    id = Column(Integer, primary_key=True, index=True)
+    filename = Column(String, unique=True, index=True)
