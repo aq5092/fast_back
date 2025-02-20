@@ -93,40 +93,40 @@ def delete_task_endpoint(task_id: int, db: Session = Depends(get_db)):
     return {"detail": f"Task with ID {task_id} deleted"}
 
 # PDF fayllarni saqlash uchun joy
-UPLOAD_DIR = "uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+# UPLOAD_DIR = "uploads"
+# os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-@router.post("/upload/")
-def upload_pdf(file: UploadFile = File(...)):
-    file_path = os.path.join(UPLOAD_DIR, file.filename)
+# @router.post("/upload/")
+# def upload_pdf(file: UploadFile = File(...)):
+#     file_path = os.path.join(UPLOAD_DIR, file.filename)
 
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+#     with open(file_path, "wb") as buffer:
+#         shutil.copyfileobj(file.file, buffer)
 
-    db = SessionLocal()
-    db_pdf = PDFFile(filename=file.filename)
-    db.add(db_pdf)
-    db.commit()
-    db.close()
+#     db = SessionLocal()
+#     db_pdf = PDFFile(filename=file.filename)
+#     db.add(db_pdf)
+#     db.commit()
+#     db.close()
 
-    return {"filename": file.filename}
+#     return {"filename": file.filename}
 
-# PDF yuklab olish
-@router.get("/download/{filename}")
-def download_pdf(filename: str):
-    file_path = os.path.join(UPLOAD_DIR, filename)
-    if os.path.exists(file_path):
-        return FileResponse(file_path, media_type="application/pdf", filename=filename)
-    raise HTTPException(status_code=404, detail="File not found")
+# # PDF yuklab olish
+# @router.get("/download/{filename}")
+# def download_pdf(filename: str):
+#     file_path = os.path.join(UPLOAD_DIR, filename)
+#     if os.path.exists(file_path):
+#         return FileResponse(file_path, media_type="application/pdf", filename=filename)
+#     raise HTTPException(status_code=404, detail="File not found")
 
-    # PDF qidirish
-@router.get("/search/")
-def search_pdf(query: str = Query(...)):
-    db = SessionLocal()
-    results = db.query(PDFFile).filter(PDFFile.filename.contains(query)).all()
-    db.close()
+#     # PDF qidirish
+# @router.get("/search/")
+# def search_pdf(query: str = Query(...)):
+#     db = SessionLocal()
+#     results = db.query(PDFFile).filter(PDFFile.filename.contains(query)).all()
+#     db.close()
     
-    return {"results": [pdf.filename for pdf in results]}
+#     return {"results": [pdf.filename for pdf in results]}
 
 # Barcha papkalar va fayllarni saqlash uchun asosiy joy
 BASE_DIR = "storage"
@@ -200,3 +200,20 @@ def download_file(file_path: str):
     if not os.path.exists(full_path):
         raise HTTPException(status_code=404, detail="Fayl topilmadi")
     return FileResponse(full_path, media_type="application/octet-stream", filename=os.path.basename(full_path))
+
+# UPLOAD_DIR = "uploads"
+# os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+# @router.post("/upload/")
+# async def upload_pdf(file: UploadFile = File(...)):
+#     file_path = os.path.join(UPLOAD_DIR, file.filename)
+#     with open(file_path, "wb") as buffer:
+#         shutil.copyfileobj(file.file, buffer)
+#     return {"filename": file.filename, "url": f"/pdf/{file.filename}"}
+
+@router.get("/{filename}")
+async def get_pdf(filename: str):
+    file_path = os.path.join(BASE_DIR, filename)
+    if os.path.exists(file_path):
+        return FileResponse(file_path, media_type="application/pdf")
+    return {"error": "File not found"}
