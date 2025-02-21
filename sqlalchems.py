@@ -36,6 +36,7 @@ class Task(Base):
     owner = relationship("User", back_populates="tasks")  # Aloqani tasvirlash
 
 class PDFFile(Base):
-    __tablename__ = "pdf_files"
+    __tablename__ = "pdf"
     id = Column(Integer, primary_key=True, index=True)
     filename = Column(String, unique=True, index=True)
+

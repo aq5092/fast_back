@@ -93,7 +93,7 @@ def delete_task_endpoint(task_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Task not found")
     return {"detail": f"Task with ID {task_id} deleted"}
 
-BASE_DIR = "storage"
+BASE_DIR = "uploads"
 os.makedirs(BASE_DIR, exist_ok=True)
 # 📁 Papka yaratish
 @router.post("/create-folder/")
@@ -103,6 +103,29 @@ def create_folder(parent_path: str, folder_name: str):
         raise HTTPException(status_code=400, detail="Bunday papka allaqachon mavjud")
     os.makedirs(folder_path)
     return {"message": f"Papka '{folder_name}' yaratildi"}
+
+# 🗑️ Papkani o‘chirish
+@router.delete("/delete-folder/")
+async def delete_folder(folder_name: str):
+    folder_path = os.path.join(BASE_DIR, folder_name)
+    if not os.path.exists(folder_path):
+        raise HTTPException(status_code=404, detail="Papka topilmadi")
+    shutil.rmtree(folder_path)
+    return {"message": f"Papka '{folder_name}' o‘chirildi"}
+
+# ✏️ Papka nomini o‘zgartirish
+@router.put("/rename-folder/")
+async def rename_folder(old_name: str, new_name: str):
+    old_path = os.path.join(BASE_DIR, old_name)
+    new_path = os.path.join(BASE_DIR, new_name)
+
+    if not os.path.exists(old_path):
+        raise HTTPException(status_code=404, detail="Eski papka topilmadi")
+    if os.path.exists(new_path):
+        raise HTTPException(status_code=400, detail="Yangi nom bilan papka allaqachon mavjud")
+
+    os.rename(old_path, new_path)
+    return {"message": f"Papka '{old_name}' '{new_name}' nomiga o‘zgartirildi"}
 
 # 📂 Papkalar va fayllar daraxtini olish
 def get_folder_tree(path: str):
@@ -128,18 +151,35 @@ def get_folder_tree(path: str):
 def list_folders():
     return {"tree": get_folder_tree(BASE_DIR)}
 
-# 📤 Fayl yuklash
+# PDF yuklash
 @router.post("/upload-file/")
-def upload_file(folder_path: str, file: UploadFile = File(...)):
-    save_path = os.path.join(BASE_DIR, folder_path, file.filename)
-    
-    if not os.path.exists(os.path.join(BASE_DIR, folder_path)):
-        raise HTTPException(status_code=404, detail="Papka topilmadi")
-    
-    with open(save_path, "wb") as buffer:
+async def upload_pdf(file: UploadFile = File(...)):
+    file_path = os.path.join(BASE_DIR, file.filename)
+
+    with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
+
+    # Faylni bazaga qo'shish
+    db = SessionLocal()
+    db_pdf = PDFFile(filename=file.filename)
+    db.add(db_pdf)
+    db.commit()
+    db.close()
+
+    return {"filename": file.filename}
+
+# 📤 Fayl yuklash
+# @router.post("/upload-file/")
+# def upload_file(folder_path: str, file: UploadFile = File(...)):
+#     save_path = os.path.join(BASE_DIR, folder_path, file.filename)
     
-    return {"message": f"Fayl '{file.filename}' '{folder_path}' papkasiga yuklandi"}
+#     if not os.path.exists(os.path.join(BASE_DIR, folder_path)):
+#         raise HTTPException(status_code=404, detail="Papka topilmadi")
+    
+#     with open(save_path, "wb") as buffer:
+#         shutil.copyfileobj(file.file, buffer)
+    
+#     return {"message": f"Fayl '{file.filename}' '{folder_path}' papkasiga yuklandi"}
 
 # 🗑️ Fayl yoki papkani o‘chirish
 @router.delete("/delete-item/")
@@ -189,6 +229,27 @@ def get_pdf(file_path: str):
         return FileResponse(file_path, media_type="application/pdf")
     
     return {"error": "File not found"}
+# 🔍 Qidirish funksiyasi
+@router.get("/search/")
+def search_files(query: str):
+    result = []
+
+    for root, dirs, files in os.walk(BASE_DIR):
+        for name in files + dirs:
+            if query.lower() in name.lower():
+                full_path = os.path.relpath(os.path.join(root, name), BASE_DIR)
+                result.append({"name": name, "path": full_path})
+
+    return {"results": result}
+# # PDF qidirish
+# @router.get("/search/")
+# async def search_pdf(query: str = Query(...)):
+#     db = SessionLocal()
+#     results = db.query(PDFFile).filter(PDFFile.filename.contains(query)).all()
+#     db.close()
+    
+#     return {"results": [pdf.filename for pdf in results]}
+
 
 # @router.delete("/{filename}")
 # async def delete_pdf(filename: str):
