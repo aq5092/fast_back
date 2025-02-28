@@ -3,17 +3,15 @@ from typing import List, Optional
 from datetime import date, datetime
 # Task uchun Pydantic model
 class TaskBase(BaseModel):
-    turi: str
-    asos: str
-    buyruq: str
+    hujjat_id: int
+    hujjat_turi: str
+    buyruq_pdf: str
     created_at: datetime
-    # updated_at: datetime
     mazmuni: str 
     xodim_soni:int
     status: str 
     izoh:str 
-    link:str 
-    link_kimda: str 
+    filename: str
     owner_id: int 
 
 
@@ -24,6 +22,10 @@ class TaskCreate(TaskBase):
 class TaskUpdate(TaskBase):
     pass
 
+
+class AsosPdfBase(BaseModel):
+    id: int 
+    filename: str   
 
 class TaskResponse(TaskBase):
     id: int

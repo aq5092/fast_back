@@ -4,13 +4,18 @@ from sqlalchemy.orm import Session
 import shutil
 import os
 from database import get_db, SessionLocal # SQLAlchemy sessiyasini olish uchun yordamchi
-from pydantics import UserBase, UserCreate, UserResponse,TaskBase,TaskCreate, TaskResponse
+from pydantics import UserBase, UserCreate, UserResponse,TaskBase,TaskCreate, TaskResponse, AsosPdfBase
 from typing import List, Optional
 import crud
-from sqlalchems import PDFFile
+from sqlalchems import  AsosPdf
 from pathlib import Path
 
 router = APIRouter()
+
+
+
+
+
 
 @router.post("/userc/", response_model=UserResponse)
 def create_user_endpoint(user: UserCreate, db: Session = Depends(get_db)):
@@ -24,6 +29,12 @@ def get_all_users(db:Session= Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
     return users
 
+@router.get("/pdfs/", response_model=List[AsosPdfBase])
+def get_all_pdfs(db: Session = Depends(get_db)):
+    pdfs = crud.get_pdfs(db)
+    if not pdfs:
+        raise HTTPException(status_code=404, detail="PDF files not found")
+    return pdfs
 
 @router.get("/users/{user_id}", response_model=UserResponse)
 def get_user_endpoint(user_id: int, db: Session = Depends(get_db)):
@@ -47,8 +58,24 @@ def delete_user_endpoint(user_id: int, db: Session = Depends(get_db)):
     return {"detail": f"User with ID {user_id} deleted"}
 
 
+BASE_DIR = "storage"
+os.makedirs(BASE_DIR, exist_ok=True)
+# PDF fayllarni saqlash uchun joy
+# UPLOAD_DIR = "uploads"
+# os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-
+@router.post("/upload_asos/")
+async def upload_asos(file: UploadFile = File(...)):
+    file_path = os.path.join(UPLOAD_DIR, file.filename)
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    db = SessionLocal()
+    pdf_file = AsosPdf(filename=file.filename)
+    db.add(pdf_file)
+    db.commit()
+    db.close()
+    return {"filename": file.filename, "url": f"/pdf/{file.filename}"}  # Fayl URL manzili
+    
 
 @router.post("/taskc/{user_id}", response_model=TaskResponse)
 def create_task_endpoint(user_id: int, task: TaskCreate, db: Session = Depends(get_db)):
@@ -93,8 +120,7 @@ def delete_task_endpoint(task_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Task not found")
     return {"detail": f"Task with ID {task_id} deleted"}
 
-BASE_DIR = "storage"
-os.makedirs(BASE_DIR, exist_ok=True)
+
 # 📁 Papka yaratish
 @router.post("/create-folder/")
 def create_folder(parent_path: str, folder_name: str):
@@ -140,11 +166,17 @@ def upload_file(folder_path: str, file: UploadFile = File(...)):
     with open(save_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
     
+    db = SessionLocal()
+    pdf_file = AsosPdf(filename=file.filename)
+    db.add(pdf_file)
+    db.commit()
+    db.close()
+    
     return {"message": f"Fayl '{file.filename}' '{folder_path}' papkasiga yuklandi"}
 
 # 🗑️ Fayl yoki papkani o‘chirish
 @router.delete("/delete-item/")
-def delete_item(item_path: str):
+def delete_item(item_path: str, filename: str, db: Session = Depends(get_db)):
     full_path = os.path.join(BASE_DIR, item_path)
     if not os.path.exists(full_path):
         raise HTTPException(status_code=404, detail="Element topilmadi")
@@ -153,6 +185,10 @@ def delete_item(item_path: str):
         shutil.rmtree(full_path)
     else:
         os.remove(full_path)
+    
+    deleted_pdf = crud.delete_pdf(db, filename)
+    if not deleted_pdf:
+        raise HTTPException(status_code=404, detail="PDF file not found")
     
     return {"message": f"'{item_path}' o‘chirildi"}
 
@@ -166,15 +202,6 @@ def download_file(file_path: str):
         raise HTTPException(status_code=404, detail="Fayl topilmadi")
     return FileResponse(full_path, media_type="application/octet-stream", filename=os.path.basename(full_path))
 
-# UPLOAD_DIR = "uploads"
-# os.makedirs(UPLOAD_DIR, exist_ok=True)
-
-@router.post("/upload/")
-async def upload_pdf(file: UploadFile = File(...)):
-    file_path = os.path.join(BASE_DIR, file.filename)
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-    return {"filename": file.filename, "url": f"/pdf/{file.filename}"}
 
 
 
@@ -204,10 +231,5 @@ def search_files(query: str):
                 result.append({"name": name, "path": full_path})
 
     return {"results": result}
-# @router.delete("/{filename}")
-# async def delete_pdf(filename: str):
-#     file_path = UPLOAD_DIR / filename
-#     if file_path.exists():
-#         file_path.unlink()
-#         return {"message": f"{filename} o‘chirildi"}
-#     raise HTTPException(status_code=404, detail="Fayl topilmadi")
+
+

@@ -14,29 +14,40 @@ class User(Base):
     email = Column(String, unique=True, nullable=False)
 
     tasks = relationship("Task", back_populates="owner")  # One-to-Many aloqasi
-
+ 
+ # buyruq_pdf = Column(String)
+    # created_at = Column(DateTime, default=datetime.utcnow, nullable=False)  # Automatically set on creation
+    # mazmuni = Column(String(length=20), nullable=False)
+    # xodim_soni = Column(Integer)
+    # status = Column(String, nullable=False)
+    # izoh = Column(String(length=100))
+    
 class Task(Base):
-    __tablename__ = "tasks"
+    __tablename__ = "tasks2"
 
     id = Column(Integer, primary_key=True, index=True)
-    turi = Column(String, nullable=False)
-    asos = Column(String)
-    buyruq = Column(String)
+    hujjat_id = Column(Integer, nullable=False)
+    hujjat_turi = Column(String, nullable=False)
+    buyruq_pdf = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)  # Automatically set on creation
-    # updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)  # Automatically updated
     mazmuni = Column(String(length=20), nullable=False)
-    buyruq_raqami = Column(String(length=20))
     xodim_soni = Column(Integer)
     status = Column(String, nullable=False)
     izoh = Column(String(length=100))
-    link = Column(String(length=100))
-    link_kimda = Column(String(length=20))
+    filename = Column(String, ForeignKey("asos.filename"))
+    asos = relationship("AsosPdf", back_populates="asos_pdf")
     owner_id = Column(Integer, ForeignKey("users.id"))
-
     owner = relationship("User", back_populates="tasks")  # Aloqani tasvirlash
 
-class PDFFile(Base):
-    __tablename__ = "pdf"
+
+class AsosPdf(Base):
+    __tablename__ = "asos"
     id = Column(Integer, primary_key=True, index=True)
     filename = Column(String, unique=True, index=True)
+    asos_pdf = relationship("Task", back_populates="asos")  # One-to-Many aloqasi
+
+# class PDFFile(Base):
+#     __tablename__ = "pdf"
+#     id = Column(Integer, primary_key=True, index=True)
+#     filename = Column(String, unique=True, index=True)
 

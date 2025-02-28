@@ -1,8 +1,15 @@
 from sqlalchemy.orm import Session
+from fastapi import FastAPI, File, UploadFile, HTTPException, Query
+from fastapi.responses import FileResponse
+import shutil
+import os
 from typing import List
 import pydantics
 import sqlalchems
 from sqlalchemy.orm import joinedload, subqueryload
+
+
+
 # User uchun CRUD funksiyalar
 def create_user(db: Session, user: pydantics.UserCreate):
     db_user = sqlalchems.User(username=user.username, email=user.email)
@@ -42,6 +49,9 @@ def get_user(db: Session, user_id: int):
 def get_users(db: Session):
     return db.query(sqlalchems.User).all()
 
+def get_pdfs(db: Session):
+    return db.query(sqlalchems.AsosPdf).all()
+
 # task uchun CRUD funksiyalar
 def create_task(db: Session, task: pydantics.TaskCreate, user_id: int):
 
@@ -62,6 +72,7 @@ def get_tasks_by_user(db: Session, user_id: int):
 def get_all_tasks(db: Session):
     return db.query(sqlalchems.Task).options(subqueryload(sqlalchems.Task.owner)).all()
 
+
 def get_task_by_id(db: Session, task_id: int):
     return db.query(sqlalchems.Task).filter(sqlalchems.Task.id == task_id).first()
 # Post ma'lumotlarini yangilash
@@ -70,18 +81,15 @@ def update_task(db: Session, task_id: int, task_update: pydantics.TaskUpdate):
     if not db_task:
         return None  # Post topilmasa, None qaytaradi
     
-    db_task.turi = task_update.turi or db_task.turi
-    db_task.asos = task_update.asos or db_task.asos
-    db_task.buyruq = task_update.buyruq or db_task.buyruq
+    db_task.hujjat_id = task_update.hujjat_id or db_task.hujjat_id
+    db_task.hujjat_turi = task_update.hujjat_turi or db_task.hujjat_turi
+    db_task.buyruq_pdf = task_update.buyruq_pdf or db_task.buyruq_pdf
     db_task.created_at = task_update.created_at or db_task.created_at
-    # db_task.updated_at = task_update.updated_at or db_task.updated_at
-    # db_task.asos = task_update.asos or db_task.asos
     db_task.mazmuni = task_update.mazmuni or db_task.mazmuni
     db_task.xodim_soni = task_update.xodim_soni or db_task.xodim_soni
     db_task.status = task_update.status or db_task.status
     db_task.izoh = task_update.izoh or db_task.izoh
-    db_task.link = task_update.link or db_task.link
-    db_task.link_kimda = task_update.link_kimda or db_task.link_kimda
+    db_task.filename = task_update.filename or db_task.filename
     db_task.owner_id = task_update.owner_id or db_task.owner_id
 
     db.commit()
@@ -97,3 +105,13 @@ def delete_task(db: Session, task_id: int):
     db.delete(db_task)
     db.commit()
     return db_task
+
+# Userni o'chirish
+def delete_pdf(db: Session, filename: str):
+    db_pdf = db.query(sqlalchems.AsosPdf).filter(sqlalchems.AsosPdf.filename == filename).first()
+    if not db_pdf:
+        return None  # User topilmasa, None qaytaradi
+
+    db.delete(db_pdf)
+    db.commit()
+    return db_pdf
